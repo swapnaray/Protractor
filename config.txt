@@ -1,0 +1,275 @@
+//npt.jasmine.conf.js
+
+exports.config = {
+
+    
+    seleniumAddress: 'http://localhost:4444/wd/hub',
+
+    //specs: ['./specs/FviewLocation.spec.js'],
+    specs: ['./specs/Fnpt_login.spec.js'],
+    //specs: ['./specs/FuserProfile.spec.js'],
+   
+    //specs: ['./specs/userProfile.spec.js'],
+    //specs: ['./specs/viewLocation.spec.js'],
+
+    // exclude: ['./specs/1234_login.spec.js'],
+    capabilities: {
+        browserName: 'chrome',
+        // chromeOptions: {
+        //     args: ["--headless", "--disable-gpu", "--window-size=800,600"]
+        // }
+        // count:7,
+        // shardTestFiles: true,
+        // maxInstances: 2,
+    },
+    // multiCapabilities:[
+    //  {
+    //     browserName: 'firefox',
+    //     // // count: 2,
+    //     // shardTestFiles: true,
+    //     // maxInstances: 2,
+    //     // specs: ['./specs/1234_login.spec.js'],
+
+    // },
+    //  {
+    //     browserName: 'chrome',
+    //     // // count: 2,
+    //     // shardTestFiles: true,
+    //     // maxInstances: 2,
+    //     // specs: ['./specs/jasmine_exam_spec.js'],
+
+    // }],
+
+    suites: {
+        regression: './specs/1234_login_DP.spec.js',
+        smoke: './specs/D*.spec.js'
+    },
+    params: {
+             url :{
+               relQa: 'https://npt-ui-npt-release-qa.paas-dev-njrar-01.ams1907.com/',
+               sprintQaUrl: '',
+               stagingQaUrl: ''
+      }
+    } ,
+
+    framework: "jasmine2", // for jasmine
+    // framework:"custom" // for cucumber
+    //resultJsonOutputFile: 'results.json',
+
+    onPrepare :function(){
+	
+    browser.driver.manage().window().maximize();
+	minwait = 3000,
+        MAXWAITTIME = 50000;
+        var monthMap = {
+            "1": "Jan",
+            "2": "Feb",
+            "3": "Mar",
+            "4": "Apr",
+            "5": "May",
+            "6": "Jun",
+            "7": "Aug",
+            "8": "Aug",
+            "9": "Sep",
+            "10": "Oct",
+            "11": "Nov",
+            "12": "Dec"
+        };
+        var currentDate = new Date(),
+            currentHoursIn24Hour = currentDate.getHours(),
+            currentTimeInHours = currentHoursIn24Hour > 12 ? currentHoursIn24Hour - 12 : currentHoursIn24Hour,
+            totalDateString = currentDate.getDate() + '-' + monthMap[currentDate.getMonth()] + '-' + (currentDate.getYear() + 1900) +
+            '-' + currentTimeInHours + 'h-' + currentDate.getMinutes() + 'm' + currentDate.getSeconds() + 's';
+
+        url = 'https://npt-ui-npt-release-qa.paas-dev-njrar-01.ams1907.com';
+        Dataprovider = require('jasmine-data-provider');
+        browserActions = require('./utils/actions.js');
+
+           // // Options to be passed to Jasmine.
+    
+
+          //to display the descriptions of Spec in green or Red based on status
+          SpecReporter = require('jasmine-spec-reporter').SpecReporter;
+          jasmine.getEnv().addReporter(new SpecReporter({
+              spec: {
+                  displayStacktrace: 'all'
+              }
+          }));
+        
+        //log4js
+        log4js = require('log4js');
+        log4js.configure({
+            appenders: { NPT: { type: 'file', filename: './logs/executionLog.log' } },
+            categories: { default: { appenders: ['NPT'], level: 'info' } }
+        });
+        logger = log4js.getLogger('Network Planning Tool');
+        //end of log4js
+
+        //Jasmine2HtmlReporter
+        Jasmine2HtmlReporter = require('protractor-jasmine2-html-reporter');
+        jasmine.getEnv().addReporter(new Jasmine2HtmlReporter({
+            savePath: './Reports/' + totalDateString,
+            screenshotsFolder: 'images',
+            takeScreenshotsOnlyOnFailures: true
+        }));
+
+        //jasmine-reporters
+
+        var jasmineReporters = require('jasmine-reporters');
+        jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
+        consolidateAll: true,
+        // savePath: './XmlReports',
+        savePath: './',
+        filePrefix: 'xmlresults'
+        }));
+
+        //
+
+        var fs = require('fs-extra');
+ 
+fs.emptyDir('screenshots/', function (err) {
+        console.log(err);
+    });
+ 
+    jasmine.getEnv().addReporter({
+        specDone: function(result) {
+            if (result.status == 'failed') {
+                browser.getCapabilities().then(function (caps) {
+                    var browserName = caps.get('browserName');
+ 
+                    browser.takeScreenshot().then(function (png) {
+                        var stream = fs.createWriteStream('screenshots/' + browserName + '-' + result.fullName+ '.png');
+                        stream.write(new Buffer(png, 'base64'));
+                        stream.end();
+                    });
+                });
+            }
+        }
+    });
+
+        
+
+   // },
+        
+  
+
+       
+       // Allure report
+      /*  AllureReporter = require('jasmine-allure-reporter');
+        jasmine.getEnv().addReporter(new AllureReporter({
+            resultsDir: './node_modules/jasmine-allure-reporter/allure-results'
+        }));
+        jasmine.getEnv().afterEach(function(done) {
+            browser.takeScreenshot().then(function(png) {
+                allure.createAttachment('Screenshot', function() {
+                    return new Buffer(png, 'base64')
+                }, 'image/png')();
+                done();
+            })
+        });*/
+
+
+    //},
+        /*onComplete: function() {
+        //cmd = require('node - cmd');
+        //cmd.run('allure-report.bat');
+
+        var browserName, browserVersion;
+        var capsPromise = browser.getCapabilities();
+
+        capsPromise.then(function(caps) {
+            browserName = caps.get('browserName');
+            browserVersion = caps.get('version');
+
+            var HTMLReport = require('protractor-html-reporter');
+
+            testConfig = {
+                reportTitle: 'Test Execution Report',
+                outputPath: './JasmineRports',
+                screenshotPath: './screenshots',
+                testBrowser: browserName,
+                browserVersion: browserVersion,
+                modifiedSuiteName: false,
+                screenshotsOnlyOnFailure: true
+            };
+            new HTMLReport().from('xmlresults.xml', testConfig);
+        });
+    
+
+    },
+    */
+
+  // onComplete: function() {
+    
+  
+
+
+   /* var jasmineReporters = require('jasmine-reporters');
+    jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
+        consolidateAll: true,
+        savePath: './',
+        filePrefix: 'xmlresults'
+    }));*/
+    
+  /*  var browserName, browserVersion;
+    var capsPromise = browser.getCapabilities();
+
+    capsPromise.then(function (caps) {
+       browserName = caps.get('browserName');
+       browserVersion = caps.get('version');
+
+
+
+       var HTMLReport = require('protractor-html-reporter');
+
+       testConfig = {
+           reportTitle: 'Test Execution Report',
+           outputPath: './',
+           screenshotPath: './screenshots',
+           testBrowser: browserName,
+           browserVersion: browserVersion,
+           modifiedSuiteName: false,
+           screenshotsOnlyOnFailure: true
+       };
+       new HTMLReport().from('xmlresults.xml', testConfig);
+   });*/
+     
+   
+
+},
+
+onComplete: function() {
+    var browserName, browserVersion;
+    var capsPromise = browser.getCapabilities();
+
+    capsPromise.then(function (caps) {
+       browserName = caps.get('browserName');
+       browserVersion = caps.get('version');
+
+       var HTMLReport = require('protractor-html-reporter');
+
+       testConfig = {
+           reportTitle: 'Test Execution Report',
+           outputPath: './SummaryReport',
+           screenshotPath: './screenshots',
+           testBrowser: browserName,
+           browserVersion: browserVersion,
+           modifiedSuiteName: false,
+           screenshotsOnlyOnFailure: true
+       };
+       //new HTMLReport().from('./XmlReports/xmlresults.xml', testConfig);
+       new HTMLReport().from('xmlresults.xml', testConfig);
+   });
+},
+
+jasmineNodeOpts: {
+    defaultTimeoutInterval: 5 * 30000,
+    showColors: true
+  }
+
+      //framework: 'jasmine2',
+
+
+ 
+
+};
