@@ -1,0 +1,23 @@
+{
+  "name": "protractor_workspace",
+  "version": "1.0.0",
+  "description": "Batch 2 Project Json",
+  "main": "conf.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "My",
+    "Project"
+  ],
+  "author": "Swapna Ray",
+  "license": "ISC",
+  "devDependencies": {
+    "protractor": "^5.4.0"
+  },
+  "dependencies": {
+    "jasmine-spec-reporter": "^4.2.1",
+    "log4js": "^2.5.3",
+    "protractor-jasmine2-html-reporter": "0.0.7"
+  }
+}
